@@ -2,11 +2,15 @@
 
 한국실용글쓰기 시험의 본문 작성 연습을 위한 정적 웹사이트입니다. 제목과 이름 입력은 없습니다. 글을 입력하고 한 장의 가로 칸 수와 세로 줄 수를 설정하면 원고지에 자동으로 배치합니다. 칸을 누르면 해당 배치 이유를 볼 수 있으며 브라우저 인쇄 기능으로 PDF 저장도 가능합니다.
 
+사이트: https://jaesin463.github.io/silgeul-wongoji/
+
 ## 실행과 배포
 
 빌드 과정이나 외부 라이브러리가 필요 없습니다. 로컬에서는 이 폴더에서 `python -m http.server 8000`을 실행한 뒤 `http://localhost:8000`을 여세요. ES 모듈을 사용하므로 `index.html` 파일을 직접 여는 방식은 브라우저에 따라 차단될 수 있습니다.
 
 GitHub Pages는 `.github/workflows/deploy.yml`로 배포합니다. `main` 브랜치에 `git push`하면 배치 테스트가 실행되고 통과한 사이트 파일만 자동으로 게시됩니다. GitHub Actions의 `workflow_dispatch`로 수동 재배포도 할 수 있습니다.
+
+사이트를 수정한 뒤 이 폴더에서 `git add .`, `git commit -m "변경 내용"`, `git push`를 실행하면 자동으로 재배포됩니다. 배포 결과는 저장소의 Actions 탭에서 확인할 수 있습니다.
 
 ## 규칙과 한계
 
