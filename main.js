@@ -25,6 +25,53 @@ function quoteGlyph(side, size, extraClass = "") {
   return svg;
 }
 
+function renderCellContent(element, cell) {
+  if (cell.kind.startsWith("quote-")) {
+    const [, side, size] = cell.kind.split("-");
+    element.append(quoteGlyph(side, size));
+  } else if (cell.kind === "mark-quote") {
+    const mark = document.createElement("span"); mark.className = "combo-mark"; mark.textContent = Array.from(cell.text)[0];
+    element.append(mark, quoteGlyph("close", cell.quoteSize || "double", "combo-quote"));
+  } else if (cell.kind === "shared" && Array.from(cell.text).length > 1) {
+    const parts = Array.from(cell.text);
+    const base = parts.slice(0, -1);
+    const hasDot = cell.quoteSize && /[.。．]/u.test(base.at(-1));
+    const letter = document.createElement("span"); letter.className = "share-letter"; letter.textContent = (hasDot ? base.slice(0, -1) : base).join("");
+    element.append(letter);
+    if (hasDot) { const dot = document.createElement("span"); dot.className = "share-dot"; dot.textContent = base.at(-1); element.append(dot); }
+    if (cell.quoteSize) element.append(quoteGlyph("close", cell.quoteSize, "shared-quote"));
+    else {
+      const mark = document.createElement("span"); mark.className = "share-mark"; mark.textContent = parts.at(-1);
+      if (/[.,。．，、]/u.test(parts.at(-1))) mark.classList.add("share-half");
+      element.append(mark);
+    }
+  } else {
+    element.textContent = cell.text;
+  }
+}
+
+function renderGuideExamples() {
+  for (const article of document.querySelectorAll(".guide-grid article[data-example]")) {
+    const source = article.dataset.example;
+    const width = Number(article.dataset.width);
+    const example = document.createElement("div"); example.className = "rule-example";
+    const label = document.createElement("span"); label.className = "rule-example-label";
+    label.textContent = `예시 · ${source.replace(/\n/g, " / ")}`;
+    const grid = document.createElement("div"); grid.className = "grid";
+    grid.style.gridTemplateColumns = `repeat(${width}, var(--cell-size))`;
+    grid.style.setProperty("--cell-size", "26px");
+    const result = layoutManuscript(source, width, 10);
+    const usedRows = result.pages[0].filter(row => row.some(cell => cell.text || cell.kind === "carry" || cell.kind === "indent"));
+    for (const row of usedRows.slice(0, 3)) for (const cell of row) {
+      const box = document.createElement("span"); box.className = `cell ${cell.kind}`;
+      renderCellContent(box, cell);
+      box.title = cell.reason;
+      grid.append(box);
+    }
+    example.append(label, grid); article.append(example);
+  }
+}
+
 function drawHero() {
   const chars = Array.from("　원고지에 한 글자씩 쓰면 생각이 선명해진다.　").concat(Array(160).fill(""));
   const root = $("hero-grid");
@@ -57,28 +104,7 @@ function render() {
         const button = document.createElement("button");
         button.type = "button";
         button.className = `cell ${cell.kind}`;
-        if (cell.kind.startsWith("quote-")) {
-          const [, side, size] = cell.kind.split("-");
-          button.append(quoteGlyph(side, size));
-        } else if (cell.kind === "mark-quote") {
-          const mark = document.createElement("span"); mark.className = "combo-mark"; mark.textContent = Array.from(cell.text)[0];
-          button.append(mark, quoteGlyph("close", cell.quoteSize || "double", "combo-quote"));
-        } else if (cell.kind === "shared" && Array.from(cell.text).length > 1) {
-          const parts = Array.from(cell.text);
-          const base = parts.slice(0, -1);
-          const hasDot = cell.quoteSize && /[.。．]/u.test(base.at(-1));
-          const letter = document.createElement("span"); letter.className = "share-letter"; letter.textContent = (hasDot ? base.slice(0, -1) : base).join("");
-          button.append(letter);
-          if (hasDot) { const dot = document.createElement("span"); dot.className = "share-dot"; dot.textContent = base.at(-1); button.append(dot); }
-          if (cell.quoteSize) button.append(quoteGlyph("close", cell.quoteSize, "shared-quote"));
-          else {
-            const mark = document.createElement("span"); mark.className = "share-mark"; mark.textContent = parts.at(-1);
-            if (/[.,。．，、]/u.test(parts.at(-1))) mark.classList.add("share-half");
-            button.append(mark);
-          }
-        } else {
-          button.textContent = cell.text;
-        }
+        renderCellContent(button, cell);
         button.title = cell.reason || `${rowIndex + 1}줄 ${colIndex + 1}칸`;
         button.setAttribute("aria-label", `${pageIndex + 1}장 ${rowIndex + 1}줄 ${colIndex + 1}칸: ${cell.text || "빈칸"}`);
         button.addEventListener("click", () => {
@@ -93,6 +119,7 @@ function render() {
   notice.textContent = result.events.length ? [...new Set(result.events)].join(" ") : "";
 }
 drawHero();
+renderGuideExamples();
 [manuscript, columns, rows].forEach(el => el.addEventListener("input", render));
 $("example").addEventListener("click", () => { manuscript.value = sample; render(); manuscript.focus(); });
 $("clear").addEventListener("click", () => { manuscript.value = ""; render(); manuscript.focus(); });

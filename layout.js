@@ -17,7 +17,7 @@ function readNumber(chars, start) {
 }
 
 export function layoutManuscript(input, width, height) {
-  if (!Number.isInteger(width) || width < 5 || width > 50 || !Number.isInteger(height) || height < 2 || height > 30) throw new RangeError("규격은 가로 5~50칸, 세로 2~30줄로 입력하세요.");
+  if (!Number.isInteger(width) || width < 10 || width > 50 || !Number.isInteger(height) || height < 10 || height > 50) throw new RangeError("규격은 가로 10~50칸, 세로 10~50줄로 입력하세요.");
   const paragraphs = String(input).replace(/\r\n?/g, "\n").split(/\n+/).map(s => s.trim().replace(/[\t ]+/g, " ")).filter(Boolean);
   const pages = [];
   const events = [];
@@ -90,9 +90,7 @@ export function layoutManuscript(input, width, height) {
         const size = char === '"' ? "double" : "single";
         straightQuoteOpen[char] = !straightQuoteOpen[char];
         if (side === "open") {
-          const end = chars.indexOf(char, i + 1);
-          const length = end < 0 ? 0 : end - i + 1;
-          if (col === width - 1 || (length && length <= width && length > width - col)) carryToNextLine("여는 따옴표가 줄 끝에 홀로 남지 않도록 다음 줄로 옮겼습니다.");
+          if (col === width - 1) carryToNextLine("여는 따옴표가 줄 끝에 홀로 남지 않도록 다음 줄로 옮겼습니다.");
         } else if (mergeQuoteWithDot(char, size)) continue;
         if (side === "close" && col === width && pages[page][row][width - 1].text) {
           const cell = pages[page][row][width - 1];
@@ -104,9 +102,7 @@ export function layoutManuscript(input, width, height) {
       if (Object.hasOwn(QUOTES, char)) {
         const [side, size] = QUOTES[char];
         if (side === "open") {
-          const end = chars.indexOf(PAIRS[char], i + 1);
-          const length = end < 0 ? 0 : end - i + 1;
-          if (col === width - 1 || (length && length <= width && length > width - col)) carryToNextLine("여는 따옴표가 줄 끝에 홀로 남지 않도록 다음 줄로 옮겼습니다.");
+          if (col === width - 1) carryToNextLine("여는 따옴표가 줄 끝에 홀로 남지 않도록 다음 줄로 옮겼습니다.");
         } else if (mergeQuoteWithDot(char, size)) continue;
         if (side === "close" && col === width && pages[page][row][width - 1].text) {
           const cell = pages[page][row][width - 1];
@@ -116,9 +112,7 @@ export function layoutManuscript(input, width, height) {
         continue;
       }
       if (Object.hasOwn(PAIRS, char)) {
-        const end = chars.indexOf(PAIRS[char], i + 1);
-        const length = end < 0 ? 0 : end - i + 1;
-        if (col === width - 1 || (col > 0 && col < width && length > width - col && length <= width)) {
+        if (col === width - 1) {
           carryToNextLine("여는 괄호가 줄 끝에 홀로 남지 않도록 이 칸을 비우고 다음 줄에서 시작합니다.");
         }
         put(char, "punctuation", "여는 괄호는 한 칸을 씁니다. 줄 끝에 홀로 남으면 다음 줄에서 시작합니다.");

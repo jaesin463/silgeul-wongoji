@@ -13,8 +13,28 @@
 .quote-glyph.quote-single{width:27%}
 .cell.mark-quote .combo-mark{position:absolute;left:3px;bottom:2px;font-size:calc(var(--cell-size)*.38)}
 .cell.mark-quote .combo-quote,.cell.shared .shared-quote{right:1px;left:auto}
-.cell.shared .share-mark.share-half{right:auto;left:2px}
+.cell.shared .share-mark.share-half{right:2px;left:auto}
 .cell.shared .share-dot{position:absolute;left:2px;bottom:2px;font-size:.45em}
+.cell.shared .share-letter{font-size:.8em}
+.columns{grid-template-columns:minmax(0,1fr);gap:24px}
+.input-panel{width:100%}
+.input-panel textarea{height:240px}
+.input-panel .size-inputs{max-width:420px}
+.result-panel{min-height:0}
+.guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.guide article{min-height:0}
+.guide article h3{margin-top:15px}
+.guide article p{min-height:68px}
+.rule-example{margin-top:18px;padding:12px;background:#fffcf6;border:1px solid #ece2d8;border-radius:7px;overflow:auto}
+.rule-example .grid{min-width:0}
+.rule-example .cell{cursor:default}
+.rule-example .cell:hover{background:transparent}
+.rule-example .cell.indent:hover{background:#eaf4ec}
+.rule-example .cell.carry:hover{background:#f5f0e8}
+.rule-example .cell.space:hover{background:#faf6e8}
+.rule-example-label{display:block;font-size:11px;font-weight:750;color:#7e9088;margin:0 0 8px}
+@media(max-width:900px){.guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.guide-grid{grid-template-columns:1fr}.input-panel textarea{height:300px}}
 .cell.ellipsis-first,.cell.ellipsis-last{display:flex;align-items:flex-end;padding-bottom:3px;font-size:calc(var(--cell-size)*.48)}
 .cell.ellipsis-first{justify-content:flex-end;padding-right:1px}
 .cell.ellipsis-last{justify-content:flex-start;padding-left:1px}
