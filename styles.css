@@ -42,3 +42,13 @@
 .cell.dash-start{justify-content:end;transform:none}
 .cell.dash-end{justify-content:start}
 @media print{.cell.mark-quote .combo-mark{font-size:calc(70mm / var(--cols))}.cell.ellipsis-first,.cell.ellipsis-last{font-size:calc(90mm / var(--cols))}}
+
+/* 결과 원고지는 가용 폭으로 칸 크기를 정하고, 같은 길이를 높이에도 적용한다. */
+.result-panel .paper{container-type:inline-size}
+.result-panel .grid{--cell-size:calc(100cqw / var(--cols));width:100%;min-width:0;grid-template-columns:repeat(var(--cols),minmax(0,1fr))}
+.result-panel .cell{width:100%;height:auto;aspect-ratio:1}
+@media print{
+  .result-panel .paper{container-type:normal}
+  .result-panel .grid{--cell-size:calc(180mm / var(--cols));width:max-content;grid-template-columns:repeat(var(--cols),var(--cell-size))!important}
+  .result-panel .cell{width:var(--cell-size);height:var(--cell-size);aspect-ratio:auto}
+}

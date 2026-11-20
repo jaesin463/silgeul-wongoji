@@ -87,7 +87,6 @@ function render() {
   try { result = layoutManuscript(manuscript.value, width, height); }
   catch (error) { notice.textContent = error.message; papers.replaceChildren(); summary.textContent = ""; return; }
   papers.replaceChildren();
-  const size = width <= 20 ? 31 : width <= 30 ? 26 : 21;
   for (const [pageIndex, page] of result.pages.entries()) {
     const paper = document.createElement("div");
     paper.className = "paper";
@@ -96,8 +95,6 @@ function render() {
     const dimensions = document.createElement("span"); dimensions.textContent = `${width}칸 × ${height}줄`;
     head.append(pageName, dimensions);
     const grid = document.createElement("div"); grid.className = "grid";
-    grid.style.gridTemplateColumns = `repeat(${width}, var(--cell-size))`;
-    grid.style.setProperty("--cell-size", `${size}px`);
     grid.style.setProperty("--cols", width);
     for (const [rowIndex, row] of page.entries()) {
       for (const [colIndex, cell] of row.entries()) {
