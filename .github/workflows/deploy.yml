@@ -30,6 +30,22 @@ jobs:
           mkdir -p site
           cp index.html styles.css layout.js main.js site/
           touch site/.nojekyll
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          version = os.environ["GITHUB_SHA"][:12]
+          index = Path("site/index.html")
+          html = index.read_text(encoding="utf-8")
+          html = html.replace('href="./styles.css"', f'href="./styles.css?v={version}"')
+          html = html.replace('src="./main.js"', f'src="./main.js?v={version}"')
+          index.write_text(html, encoding="utf-8")
+
+          main = Path("site/main.js")
+          script = main.read_text(encoding="utf-8")
+          script = script.replace('from "./layout.js"', f'from "./layout.js?v={version}"')
+          main.write_text(script, encoding="utf-8")
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
