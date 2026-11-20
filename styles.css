@@ -52,3 +52,17 @@
   .result-panel .grid{--cell-size:calc(180mm / var(--cols))!important;width:max-content;grid-template-columns:repeat(var(--cols),var(--cell-size))!important}
   .result-panel .cell{width:var(--cell-size);height:var(--cell-size);aspect-ratio:auto}
 }
+
+/* 한 칸에 함께 쓴 글자도 본문과 같은 색과 서체로 읽히게 한다. */
+.cell{font-family:"Batang","Noto Serif KR","AppleMyungjo",serif;color:#2c3936}
+.cell.punctuation,.cell.shared,.cell.quote-open-double,.cell.quote-open-single,.cell.quote-close-double,.cell.quote-close-single,.cell.mark-quote{color:#2c3936}
+.cell.number,.cell.lower,.cell.unit,.cell.shared{font-size:calc(var(--cell-size)*.48)}
+.cell.compact-pair{font-size:calc(var(--cell-size)*.43)}
+.cell.compact-long{font-size:calc(var(--cell-size)*.35)}
+.cell.shared .share-letter{font-size:1em}
+.cell.shared .share-mark,.cell.shared .share-dot{font-size:.68em}
+@media print{
+  .cell.number,.cell.lower,.cell.unit,.cell.shared{font-size:calc(90mm / var(--cols))}
+  .cell.compact-pair{font-size:calc(80mm / var(--cols))}
+  .cell.compact-long{font-size:calc(65mm / var(--cols))}
+}

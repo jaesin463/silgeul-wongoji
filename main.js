@@ -50,6 +50,12 @@ function renderCellContent(element, cell) {
   }
 }
 
+function cellClass(cell) {
+  const length = Array.from(cell.text).length;
+  const compact = ["number", "lower", "unit"].includes(cell.kind);
+  return `cell ${cell.kind}${compact && length > 2 ? " compact-long" : compact && length === 2 ? " compact-pair" : ""}`;
+}
+
 function renderGuideExamples() {
   for (const article of document.querySelectorAll(".guide-grid article[data-example]")) {
     const source = article.dataset.example;
@@ -63,7 +69,7 @@ function renderGuideExamples() {
     const result = layoutManuscript(source, width, 10);
     const usedRows = result.pages[0].filter(row => row.some(cell => cell.text || cell.kind === "carry" || cell.kind === "indent"));
     for (const row of usedRows.slice(0, 3)) for (const cell of row) {
-      const box = document.createElement("span"); box.className = `cell ${cell.kind}`;
+      const box = document.createElement("span"); box.className = cellClass(cell);
       renderCellContent(box, cell);
       box.title = cell.reason;
       grid.append(box);
@@ -100,7 +106,7 @@ function render() {
       for (const [colIndex, cell] of row.entries()) {
         const button = document.createElement("button");
         button.type = "button";
-        button.className = `cell ${cell.kind}`;
+        button.className = cellClass(cell);
         renderCellContent(button, cell);
         button.title = cell.reason || `${rowIndex + 1}줄 ${colIndex + 1}칸`;
         button.setAttribute("aria-label", `${pageIndex + 1}장 ${rowIndex + 1}줄 ${colIndex + 1}칸: ${cell.text || "빈칸"}`);
