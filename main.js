@@ -32,6 +32,12 @@ function renderCellContent(element, cell) {
   } else if (cell.kind === "mark-quote") {
     const mark = document.createElement("span"); mark.className = "combo-mark"; mark.textContent = Array.from(cell.text)[0];
     element.append(mark, quoteGlyph("close", cell.quoteSize || "double", "combo-quote"));
+  } else if (cell.kind === "emphasis" || cell.kind === "underlined") {
+    const letter = document.createElement("span"); letter.className = "emphasis-letter"; letter.textContent = Array.from(cell.text)[0];
+    element.append(letter);
+    if (cell.kind === "emphasis") {
+      const dot = document.createElement("span"); dot.className = "emphasis-dot"; dot.textContent = "·"; element.append(dot);
+    }
   } else if (cell.kind === "shared" && Array.from(cell.text).length > 1) {
     const parts = Array.from(cell.text);
     const base = parts.slice(0, -1);
@@ -43,6 +49,7 @@ function renderCellContent(element, cell) {
     else {
       const mark = document.createElement("span"); mark.className = "share-mark"; mark.textContent = parts.at(-1);
       if (/[.,。．，、]/u.test(parts.at(-1))) mark.classList.add("share-half");
+      if (/[)\]}〉》>≫」』｣]/u.test(parts.at(-1))) mark.classList.add("share-closing");
       element.append(mark);
     }
   } else {

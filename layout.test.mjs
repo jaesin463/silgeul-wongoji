@@ -114,3 +114,28 @@ test("줄임표와 줄표는 두 칸에 나누어 쓴다", () => {
   assert.deepEqual(result.pages[0][0].slice(5, 7).map(cell => cell.kind), ["dash-start", "dash-end"]);
 });
 
+test("세 점 줄임표와 여섯 점 줄임표를 구별한다", () => {
+  const result = layoutManuscript("가...나......다", 15, 10);
+  assert.deepEqual(line(result, 0, 0).slice(0, 7), ["", "가", "…", "나", "…", "…", "다"]);
+  assert.equal(result.pages[0][0][2].kind, "ellipsis-single");
+  assert.deepEqual(result.pages[0][0].slice(4, 6).map(cell => cell.kind), ["ellipsis-first", "ellipsis-last"]);
+});
+
+test("책 제목 부호와 괄호가 줄 끝에 홀로 남지 않는다", () => {
+  const result = layoutManuscript("가나다라마바사아≪논어≫", 10, 10);
+  assert.equal(result.pages[0][0][9].kind, "carry");
+  assert.deepEqual(line(result, 0, 1).slice(0, 4), ["≪", "논", "어", "≫"]);
+});
+
+test("숨김표와 빠짐표, 붙임표와 물결표를 문장 부호로 분류한다", () => {
+  const result = layoutManuscript("김○□ 읽- 3~5", 15, 10);
+  const cells = result.pages[0][0].filter(cell => "○□-~".includes(cell.text) && cell.text);
+  assert.deepEqual(cells.map(cell => cell.text), ["○", "□", "-", "~"]);
+  assert.ok(cells.every(cell => cell.kind === "punctuation"));
+});
+
+test("드러냄표와 밑줄은 앞 한글과 같은 칸에 표시한다", () => {
+  const result = layoutManuscript("가˙나_", 10, 10);
+  assert.deepEqual(result.pages[0][0].slice(1, 3).map(cell => [cell.text, cell.kind]), [["가˙", "emphasis"], ["나_", "underlined"]]);
+});
+

@@ -1,5 +1,20 @@
-const PAIRS = { "(": ")", "[": "]", "{": "}", "“": "”", "‘": "’", "「": "」", "『": "』", "<": ">" };
+const PAIRS = { "(": ")", "[": "]", "{": "}", "“": "”", "‘": "’", "「": "」", "『": "』", "｢": "｣", "〈": "〉", "《": "》", "<": ">", "≪": "≫" };
 const HALF_MARKS = new Set([".", ",", "。", "．", "，", "、"]);
+const SYMBOL_REASONS = {
+  ":": "쌍점은 한 칸에 씁니다. 설명을 이을 때는 뒤를 띄고, 시각·비율에서는 붙여 씁니다. 입력한 띄어쓰기를 따릅니다.",
+  "：": "쌍점은 한 칸에 씁니다. 뒤의 띄어쓰기는 문맥에 따라 입력한 대로 표시합니다.",
+  ";": "쌍반점은 한 칸에 씁니다. 뒤의 띄어쓰기는 입력한 대로 표시합니다.",
+  "；": "쌍반점은 한 칸에 씁니다. 뒤의 띄어쓰기는 입력한 대로 표시합니다.",
+  "·": "가운뎃점은 한 칸의 가운데에 씁니다.",
+  "/": "빗금은 한 칸에 씁니다. 앞뒤 띄어쓰기는 입력한 대로 표시합니다.",
+  "-": "붙임표는 한 칸에 씁니다. 두 칸에 쓰는 줄표(―)와 구별합니다.",
+  "~": "물결표는 범위 등을 나타낼 때 한 칸에 씁니다.",
+  "～": "물결표는 범위 등을 나타낼 때 한 칸에 씁니다.",
+  "∼": "물결표는 범위 등을 나타낼 때 한 칸에 씁니다.",
+  "○": "숨김표는 가린 글자 한 자마다 한 칸씩 씁니다.",
+  "×": "숨김표는 가린 글자 한 자마다 한 칸씩 씁니다.",
+  "□": "빠짐표는 비어 있는 글자 한 자마다 한 칸씩 씁니다."
+};
 const UNITS = ["cm²", "cm2", "mm²", "mm2", "mL", "㎖", "cm", "mm", "km", "kg", "mg", "mℓ", "ml", "㎡", "㎠", "㎝", "㎜", "℃", "ℓ", "g", "m", "L", "%"];
 const QUOTES = { "“": ["open", "double"], "”": ["close", "double"], "‘": ["open", "single"], "’": ["close", "single"] };
 
@@ -47,7 +62,7 @@ export function layoutManuscript(input, width, height) {
     previous.reason = "온점과 닫는 따옴표는 한 칸에 함께 씁니다. 온점은 왼쪽 아래, 닫는 따옴표는 오른쪽 위에 둡니다.";
     return true;
   };
-  const punctuation = new Set(Array.from(".,!?;:。．，、？！；：·…—―~～/()[]{}“”‘’「」『』<>%×\"'"));
+  const punctuation = new Set(Array.from(".,!?;:。．，、？！；：·…—―-~～∼/()[]{}“”‘’「」｢｣『』〈〉《》<>≪≫%○×□\"'"));
   const closing = new Set(Object.values(PAIRS));
   for (const [pIndex, paragraph] of paragraphs.entries()) {
     if (pIndex > 0 && col > 0) line();
@@ -60,6 +75,15 @@ export function layoutManuscript(input, width, height) {
       if (char === " ") {
         if (col > 0 && col < width && pages[page][row][col - 1].text) put("", "space", "단어 사이를 한 칸 띄웁니다. 줄 끝에 걸리는 공백은 다음 줄 첫 칸에 다시 쓰지 않습니다.");
         continue;
+      }
+      if ((char === "˙" || char === "_") && col > 0) {
+        const previous = pages[page][row][col - 1];
+        if (previous.text && /^[가-힣\u3400-\u9fff]$/u.test(previous.text)) {
+          previous.text += char;
+          previous.kind = char === "˙" ? "emphasis" : "underlined";
+          previous.reason = char === "˙" ? "드러냄표는 강조할 글자의 위에 찍습니다." : "밑줄은 강조할 글자의 아래에 긋습니다.";
+          continue;
+        }
       }
       if (/^[0-9]$/.test(char)) {
         const run = readNumber(chars, i);
@@ -125,6 +149,15 @@ export function layoutManuscript(input, width, height) {
         i += char === "…" ? 1 : 5;
         continue;
       }
+      if (char === "…" || chars.slice(i, i + 3).join("") === "...") {
+        if (col === width && pages[page][row][width - 1].text) {
+          const cell = pages[page][row][width - 1];
+          cell.text += "…"; cell.kind = "shared";
+          cell.reason = "세 점 줄임표가 다음 줄 첫 칸에 홀로 놓이지 않도록 마지막 칸에 함께 표시했습니다.";
+        } else put("…", "ellipsis-single", "세 점 줄임표는 한 칸에 씁니다. 여섯 점 줄임표는 두 칸에 나누어 씁니다.");
+        if (char === ".") i += 2;
+        continue;
+      }
       if (char === "—" || char === "―") {
         if (col === width - 1) carryToNextLine("줄표는 두 칸을 사용하므로 마지막 한 칸에서 시작하지 않습니다.");
         put(char, "dash-start", "줄표는 두 칸에 걸쳐 씁니다.");
@@ -145,7 +178,7 @@ export function layoutManuscript(input, width, height) {
         continue;
       }
       if (punctuation.has(char)) {
-        put(char, HALF_MARKS.has(char) ? "half-mark" : "punctuation", HALF_MARKS.has(char) ? "마침표·쉼표는 칸의 왼쪽 아래에 작게 쓰고, 다음 칸을 비우지 않습니다." : "문장 부호는 한 칸에 하나씩 씁니다.");
+        put(char, HALF_MARKS.has(char) ? "half-mark" : "punctuation", HALF_MARKS.has(char) ? "마침표·쉼표는 칸의 왼쪽 아래에 작게 쓰고, 다음 칸을 비우지 않습니다." : SYMBOL_REASONS[char] || "문장 부호는 한 칸에 하나씩 씁니다.");
         if (HALF_MARKS.has(char)) {
           while (chars[i + 1] === " ") { i++; events.push("마침표·쉼표 뒤의 공백을 원고지 관행에 따라 생략했습니다."); }
         }
