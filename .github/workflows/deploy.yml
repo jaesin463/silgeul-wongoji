@@ -52,6 +52,8 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
+      - name: Wait for artifact indexing
+        run: sleep 10
       - name: Publish Pages
         id: deployment
         uses: actions/deploy-pages@v4
