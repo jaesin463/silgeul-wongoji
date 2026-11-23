@@ -28,7 +28,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p site
-          cp index.html styles.css layout.js main.js site/
+          cp index.html styles.css layout.js main.js correction.js site/
           touch site/.nojekyll
           python3 - <<'PY'
           from pathlib import Path
@@ -44,6 +44,7 @@ jobs:
           main = Path("site/main.js")
           script = main.read_text(encoding="utf-8")
           script = script.replace('from "./layout.js"', f'from "./layout.js?v={version}"')
+          script = script.replace('from "./correction.js"', f'from "./correction.js?v={version}"')
           main.write_text(script, encoding="utf-8")
           PY
       - name: Configure Pages
