@@ -1,4 +1,5 @@
 import { layoutManuscript } from "./layout.js";
+import { renderCorrectionExamples } from "./correction.js";
 
 const sample = `글을 쓰는 일은 생각을 정리하는 과정이다. 원고지에 한 글자씩 옮기면 문장의 흐름도 더 또렷하게 보인다.
 
@@ -130,6 +131,7 @@ function render() {
 }
 drawHero();
 renderGuideExamples();
+renderCorrectionExamples($("correction-grid"));
 [manuscript, columns, rows].forEach(el => el.addEventListener("input", render));
 $("example").addEventListener("click", () => { manuscript.value = sample; render(); manuscript.focus(); });
 $("clear").addEventListener("click", () => { manuscript.value = ""; render(); manuscript.focus(); });
